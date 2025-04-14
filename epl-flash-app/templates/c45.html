@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ algo }} Visualization</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5; }
+        h1 { color: #333; }
+        img { max-width: 100%; margin-bottom: 20px; }
+        .metric { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>{{ algo }} - C4.5 Decision Tree & Metrics</h1>
+
+    <div class="metrics">
+        {% for key, value in metrics.items() %}
+            <div class="metric"><strong>{{ key }}:</strong> {{ value }}</div>
+        {% endfor %}
+    </div>
+
+    <h2>Decision Tree</h2>
+    <img src="{{ url_for('static', filename=tree.split('static/')[1]) }}" alt="Decision Tree">
+
+    <h2>Correlation Heatmap</h2>
+    <img src="{{ url_for('static', filename=heatmap.split('static/')[1]) }}" alt="Heatmap">
+</body>
+</html>
