@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Visualization - {{ algo }}</title>
+</head>
+<body>
+    <h1>{{ algo }} Visualizations</h1>
+    {% for plot in plots %}
+    <img src="{{ url_for('static', filename=plot.split('static/')[1]) }}" width="600">
+    {% endfor %}
+    <br><a href="/">← Back to Index</a>
+</body>
+</html>

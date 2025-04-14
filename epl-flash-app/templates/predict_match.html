@@ -1,0 +1,19 @@
+<!-- predict_match.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Prediction</title>
+</head>
+<body>
+    <h2>Predict Match Result</h2>
+    <form method="POST" action="{{ url_for('predict_match') }}">
+        <label for="home_team">Home Team:</label>
+        <input type="text" id="home_team" name="home_team" required><br><br>
+        <label for="away_team">Away Team:</label>
+        <input type="text" id="away_team" name="away_team" required><br><br>
+        <button type="submit">Predict</button>
+    </form>
+</body>
+</html>

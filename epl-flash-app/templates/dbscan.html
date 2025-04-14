@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ algo }} Visualization</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5; }
+        h1 { color: #333; }
+        img { max-width: 100%; margin-bottom: 20px; }
+        .metric { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>{{ algo }} - DBSCAN Clustering</h1>
+
+    <h2>K-Distance Graph</h2>
+    <img src="{{ url_for('static', filename=kd_graph.split('static/')[1]) }}" alt="DBSCAN K-Distance Graph">
+
+    <h2>DBSCAN Clustering Scatter Plot</h2>
+    <img src="{{ url_for('static', filename=scatter_plot.split('static/')[1]) }}" alt="DBSCAN Clustering Scatter Plot">
+
+    {% if silhouette_score is not none %}
+    <h3>Silhouette Score: {{ silhouette_score }}</h3>
+    {% endif %}
+</body>
+</html>

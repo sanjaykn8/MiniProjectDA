@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EPL Analyzer</title>
+</head>
+<body>
+    <h1>Select Algorithm</h1>
+    <form action="/visualize" method="post">
+        <select name="algo">
+            {% for algo in algorithms %}
+            <option value="Apriori & FP Growth">Apriori FP</option>
+            <option value="Naïve Bayes">Naïve Bayes</option>
+            <option value="ID3 Decision Tree">ID3</option>
+            <option value="CART">Cart</option>
+            <option value="C4.5">C4.5</option>
+            <option value="KNN">KNN</option>
+            <option value="KMeans">KMeans</option>
+            <option value="Agglomerative">Agglomerative</option>
+            <option value="DBScan">DBScan</option>
+            <option value="Predict Match">Predict</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Visualize</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ algo }} Visualization</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5; }
+        h1 { color: #333; }
+        img { max-width: 100%; margin-bottom: 20px; }
+        .metric { margin: 5px 0; }
+        .report { white-space: pre-wrap; font-family: Consolas, monospace; }
+    </style>
+</head>
+<body>
+    <h1>{{ algo }} - KNN Classification & Metrics</h1>
+
+    <div class="metrics">
+        <div class="metric"><strong>Accuracy:</strong> {{ accuracy }}</div>
+    </div>
+
+    <h2>Classification Report</h2>
+    <div class="report">
+        {% include report %}
+    </div>
+
+    <h2>Confusion Matrix</h2>
+    <img src="{{ url_for('static', filename=cm.split('static/')[1]) }}" alt="Confusion Matrix">
+</body>
+</html>
