@@ -76,4 +76,5 @@ def generate_apriori_fp_plots():
         plt.close()
         plot_paths.append(path)
 
-    return plot_paths
+    return [path.replace("static/", "").replace("\\", "/") for path in plot_paths]
+

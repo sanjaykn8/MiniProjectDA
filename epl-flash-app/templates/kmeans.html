@@ -3,12 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ algo }} Visualization</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5; }
-        h1 { color: #333; }
-        img { max-width: 100%; margin-bottom: 20px; }
-        .metric { margin: 5px 0; }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <h1>{{ algo }} - K-Means Clustering</h1>

@@ -73,7 +73,7 @@ def visualize():
                             silhouette_score=results['silhouette_score'], 
                             algo=selected)
         
-    elif selected == "Agglomerative":
+    elif selected == "Agglomerative": 
         results = generate_agglomerative_visuals()
         return render_template('agglomerative.html', 
                             dendrogram=results['dendrogram'], 
@@ -81,7 +81,7 @@ def visualize():
                             silhouette_score=results['silhouette_score'], 
                             algo=selected)
     
-    elif selected == "DBSCAN":
+    elif selected == "DBScan":
         results = generate_dbscan_visuals()
         return render_template('dbscan.html', 
                             kd_graph=results['kd_graph'], 

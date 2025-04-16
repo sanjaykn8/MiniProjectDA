@@ -2,10 +2,7 @@
 <html>
 <head>
     <title>{{ algo }} Results</title>
-    <style>
-        body { font-family: Arial; padding: 20px; }
-        .metric { margin-bottom: 10px; }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <h2>{{ algo }} Metrics</h2>
