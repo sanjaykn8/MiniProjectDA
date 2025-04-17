@@ -1,15 +1,77 @@
-<!-- prediction_result.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prediction Result</title>
+    <title>Tournament Result</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h2>Match Prediction Result</h2>
-    <pre>{{ result }}</pre>
-    <a href="{{ url_for('index') }}">Back to Home</a>
+    <h1>Tournament Results</h1>
+
+    <section class="result-section">
+        <h2>Match Results</h2>
+        <ul>
+            {% for match in results %}
+                <li>{{ match }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section class="result-section">
+        <h2>Points Table</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Team</th>
+                        <th>Played</th>
+                        <th>Wins</th>
+                        <th>Draws</th>
+                        <th>Losses</th>
+                        <th>Points</th>
+                        <th>Goals Scored</th>
+                        <th>Goals Conceded</th>
+                        <th>Goal Difference</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for team, stats in points_table.items() %}
+                    <tr>
+                        <td>{{ team }}</td>
+                        <td>{{ stats.played }}</td>
+                        <td>{{ stats.wins }}</td>
+                        <td>{{ stats.draws }}</td>
+                        <td>{{ stats.losses }}</td>
+                        <td>{{ stats.points }}</td>
+                        <td>{{ stats.goals_scored }}</td>
+                        <td>{{ stats.goals_conceded }}</td>
+                        <td>{{ stats.goals_scored - stats.goals_conceded }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="result-section">
+        <h2>Semi Finalists</h2>
+        <ul>
+            {% for semi in semi_finals %}
+                <li>{{ semi }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section class="result-section">
+        <h2>Final Match</h2>
+        <p>{{ final_match }}</p>
+    </section>
+
+    <section class="result-section">
+        <h2>🏆 Winner: {{ winner }} 🏆</h2>
+    </section>
+
+    <a href="{{ url_for('index') }}">⬅ Back to Home</a>
 </body>
 </html>

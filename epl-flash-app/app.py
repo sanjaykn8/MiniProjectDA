@@ -1,32 +1,19 @@
 from flask import Flask, render_template, request
-from visualizations.apriori_fp import generate_apriori_fp_plots
-from visualizations.bayes import generate_bayes_visuals
 from visualizations.id3 import generate_id3_visuals  
 from visualizations.cart import generate_cart_visuals
-from visualizations.c45 import generate_c45_visuals
-from visualizations.knn import generate_knn_visuals
-from visualizations.kmeans import generate_kmeans_visuals
-from visualizations.agglomerative import generate_agglomerative_visuals
-from visualizations.dbscan import generate_dbscan_visuals
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
+import random
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
     algorithms = [
-        "Apriori & FP Growth",
-        "Naïve Bayes",
         "ID3 Decision Tree",
         "CART",
-        "C4.5",
-        "KNN",
-        "KMeans",
-        "Agglomerative",
-        "DBScan",
         "Predict Match"
     ]
     return render_template('index.html', algorithms=algorithms)
@@ -34,60 +21,13 @@ def index():
 @app.route('/visualize', methods=['POST'])
 def visualize():
     selected = request.form.get('algo')
-    
-    if selected == "Apriori & FP Growth":
-        plots = generate_apriori_fp_plots()
-        return render_template('apr.html', plots=plots, algo=selected)
-    
-    elif selected == "Naïve Bayes":
-        results = generate_bayes_visuals()
-        return render_template('bayes.html', metrics=results, algo=selected)
-    
-    elif selected == "ID3 Decision Tree":
+    if selected == "ID3 Decision Tree":
         results = generate_id3_visuals()
         return render_template('id3.html', metrics=results, algo=selected)
     
     elif selected == "CART":
         results = generate_cart_visuals()
         return render_template('cart.html', metrics=results['metrics'], tree=results['tree_plot'], heatmap=results['heatmap'], algo=selected)
-    
-    elif selected == "C4.5":
-        results = generate_c45_visuals()
-        return render_template('c45.html', metrics=results['metrics'], tree=results['tree_plot'], heatmap=results['heatmap'], algo=selected)
-    
-    elif selected == "KNN":
-        knn_data = generate_knn_visuals()
-        with open(knn_data["classification_report"], "r") as f:
-            report_text = f.read()
-        return render_template("knn_result.html",
-                               accuracy=knn_data["accuracy"],
-                               report=report_text,
-                               cm_image=knn_data["confusion_matrix"],
-                               algo=selected)
-        
-    elif selected == "KMeans":
-        results = generate_kmeans_visuals()
-        return render_template('kmeans.html', 
-                            elbow_plot=results['elbow_plot'], 
-                            scatter_plot=results['scatter_plot'], 
-                            silhouette_score=results['silhouette_score'], 
-                            algo=selected)
-        
-    elif selected == "Agglomerative": 
-        results = generate_agglomerative_visuals()
-        return render_template('agglomerative.html', 
-                            dendrogram=results['dendrogram'], 
-                            scatter_plot=results['scatter_plot'], 
-                            silhouette_score=results['silhouette_score'], 
-                            algo=selected)
-    
-    elif selected == "DBScan":
-        results = generate_dbscan_visuals()
-        return render_template('dbscan.html', 
-                            kd_graph=results['kd_graph'], 
-                            scatter_plot=results['scatter_plot'], 
-                            silhouette_score=results['silhouette_score'], 
-                            algo=selected)
     
     elif selected == "Predict Match":
         return render_template('predict_match.html')
@@ -97,6 +37,7 @@ def visualize():
 @app.route('/predict_match', methods=['POST'])
 def predict_match():
     df = pd.read_csv('EPL.csv')
+    
     def compute_team_stats(df):
         team_stats = {}
 
@@ -135,104 +76,121 @@ def predict_match():
                 'away_avg_fouls': away_avg_fouls
             }
         return team_stats
-    team_stats = compute_team_stats(df)
-
-    features = []
-    goal_labels = []
-    shot_labels = []
-    shot_on_target_labels = []
-    foul_labels = []
-
-    for _, row in df.iterrows():
-        home_team = row['HomeTeam']
-        away_team = row['AwayTeam']
         
-        if home_team in team_stats and away_team in team_stats:
-            home = team_stats[home_team]
-            away = team_stats[away_team]
+    def tournament():
+        teams = request.form.getlist('team[]')
+        
+        team_stats = compute_team_stats(df)
 
-            features.append([
+        # Prepare training data
+        features, goal_labels, shot_labels, shot_on_target_labels, foul_labels = [], [], [], [], []
+        for _, row in df.iterrows():
+            home_team, away_team = row['HomeTeam'], row['AwayTeam']
+            if home_team in team_stats and away_team in team_stats:
+                home, away = team_stats[home_team], team_stats[away_team]
+                features.append([home['home_win_pct'], away['away_win_pct'],
+                                 home['home_avg_goals'], away['away_avg_goals'],
+                                 home['home_avg_shots'], away['away_avg_shots'],
+                                 home['home_avg_shots_on_target'], away['away_avg_shots_on_target'],
+                                 home['home_avg_fouls'], away['away_avg_fouls']])
+                goal_labels.append([row['FullTimeHomeTeamGoals'], row['FullTimeAwayTeamGoals']])
+
+        X = np.array(features)
+        y_goals = np.array(goal_labels)
+
+        X_train_g, _, y_train_g, _ = train_test_split(X, y_goals, test_size=0.1, random_state=42)
+        goal_regressor = DecisionTreeRegressor(random_state=42)
+        goal_regressor.fit(X_train_g, y_train_g)
+
+        def predict_match_result(home_team, away_team):
+            if home_team not in team_stats or away_team not in team_stats:
+                print(f"Warning: Missing team stats for {home_team} or {away_team}. Returning default score.")
+                return 0, 0
+            home, away = team_stats[home_team], team_stats[away_team] 
+            input_features = np.array([[
                 home['home_win_pct'], away['away_win_pct'],
                 home['home_avg_goals'], away['away_avg_goals'],
                 home['home_avg_shots'], away['away_avg_shots'],
                 home['home_avg_shots_on_target'], away['away_avg_shots_on_target'],
                 home['home_avg_fouls'], away['away_avg_fouls']
-            ])
+            ]])
+            goal_pred = goal_regressor.predict(input_features)[0]
+            return int(round(goal_pred[0])), int(round(goal_pred[1]))
 
-            goal_labels.append([row['FullTimeHomeTeamGoals'], row['FullTimeAwayTeamGoals']])  
-            shot_labels.append([row['HomeTeamShots'], row['AwayTeamShots']])
-            shot_on_target_labels.append([row['HomeTeamShotsOnTarget'], row['AwayTeamShotsOnTarget']])
-            foul_labels.append([row['HomeTeamFouls'], row['AwayTeamFouls']])
-                
-    X = np.array(features)
-    y_goals = np.array(goal_labels)
-    y_shots = np.array(shot_labels)
-    y_shots_on_target = np.array(shot_on_target_labels)
-    y_fouls = np.array(foul_labels)
+        def simulate_round(team_list):
+            stats = {
+                team: {
+                    'played': 0,
+                    'wins': 0,
+                    'draws': 0,
+                    'losses': 0,
+                    'points': 0,
+                    'goals_scored': 0,
+                    'goals_conceded': 0
+                } for team in team_list
+            }
+            results = []
 
-    X_train_g, X_test_g, y_train_g, y_test_g = train_test_split(X, y_goals, test_size=0.1, random_state=42)
-    X_train_s, X_test_s, y_train_s, y_test_s = train_test_split(X, y_shots, test_size=0.1, random_state=42)
-    X_train_st, X_test_st, y_train_st, y_test_st = train_test_split(X, y_shots_on_target, test_size=0.1, random_state=42)
-    X_train_f, X_test_f, y_train_f, y_test_f = train_test_split(X, y_fouls, test_size=0.1, random_state=42)
+            for i in range(len(team_list)):
+                for j in range(len(team_list)):
+                    if i != j:
+                        home, away = team_list[i], team_list[j]
+                        hg, ag = predict_match_result(home, away)
+                        stats[home]['played'] += 1
+                        stats[away]['played'] += 1
+                        stats[home]['goals_scored'] += hg
+                        stats[home]['goals_conceded'] += ag
+                        stats[away]['goals_scored'] += ag
+                        stats[away]['goals_conceded'] += hg
 
-    goal_regressor = DecisionTreeRegressor(random_state=42)
-    goal_regressor.fit(X_train_g, y_train_g)
+                        if hg > ag:
+                            stats[home]['points'] += 3
+                            stats[home]['wins'] += 1
+                            stats[away]['losses'] += 1
+                        elif hg < ag:
+                            stats[away]['points'] += 3
+                            stats[away]['wins'] += 1
+                            stats[home]['losses'] += 1
+                        else:
+                            stats[home]['points'] += 1
+                            stats[away]['points'] += 1
+                            stats[home]['draws'] += 1
+                            stats[away]['draws'] += 1
 
-    shot_regressor = DecisionTreeRegressor(random_state=42)
-    shot_regressor.fit(X_train_s, y_train_s)
+                        results.append((home, hg, away, ag))
 
-    shot_on_target_regressor = DecisionTreeRegressor(random_state=42)
-    shot_on_target_regressor.fit(X_train_st, y_train_st)
+            return stats, results
 
-    foul_regressor = DecisionTreeRegressor(random_state=42)
-    foul_regressor.fit(X_train_f, y_train_f)
-        
-    def predict_match_result(home_team, away_team):
-        if home_team not in team_stats or away_team not in team_stats:
-            return "Invalid teams!"
+        round1_stats, group_results = simulate_round(teams)
+        sorted_teams = sorted(teams, key=lambda x: (round1_stats[x]['points'], round1_stats[x]['goals_scored'] - round1_stats[x]['goals_conceded']), reverse=True)
+        semis = sorted_teams[:4]
 
-        home = team_stats[home_team]
-        away = team_stats[away_team]
+        semi_stats, semi_results = simulate_round(semis)
+        sorted_semis = sorted(semis, key=lambda x: (semi_stats[x]['points'], semi_stats[x]['goals_scored'] - semi_stats[x]['goals_conceded']), reverse=True)
+        finalists = sorted_semis[:2]
 
-        input_features = np.array([[
-            home['home_win_pct'], away['away_win_pct'],
-            home['home_avg_goals'], away['away_avg_goals'],
-            home['home_avg_shots'], away['away_avg_shots'],
-            home['home_avg_shots_on_target'], away['away_avg_shots_on_target'],
-            home['home_avg_fouls'], away['away_avg_fouls']
-        ]]).reshape(1, -1)
+        # Finals
+        final_home1, final_away1 = finalists[0], finalists[1]
+        fg1, fg2 = predict_match_result(final_home1, final_away1)
+        fg3, fg4 = predict_match_result(final_away1, final_home1)
+        final_score1 = fg1 + fg4
+        final_score2 = fg2 + fg3
+        winner = final_home1 if final_score1 > final_score2 else final_away1 if final_score2 > final_score1 else "Draw"
+        if final_score1 == final_score2:
+            winner = random.choice([final_home1, final_away1])  # or simulate penalties
 
-        goal_pred = goal_regressor.predict(input_features)[0]  
-        shot_pred = shot_regressor.predict(input_features)[0]
-        shot_on_target_pred = shot_on_target_regressor.predict(input_features)[0]
-        foul_pred = foul_regressor.predict(input_features)[0]
+        return render_template(
+            'prediction_result.html',
+            results=group_results,
+            points_table=round1_stats,  # updated
+            semi_finals=semis,
+            semi_results=semi_results,
+            finalists=finalists,
+            final_match=f"{final_home1} ({fg1} + {fg4}) vs {final_away1} ({fg2} + {fg3})",
+            winner=winner
+        )
 
-        home_goals, away_goals = int(round(goal_pred[0])), int(round(goal_pred[1]))
-        home_shots, away_shots = int(round(shot_pred[0])), int(round(shot_pred[1]))
-        home_shots_on_target, away_shots_on_target = int(round(shot_on_target_pred[0])), int(round(shot_on_target_pred[1]))
-        home_fouls, away_fouls = int(round(foul_pred[0])), int(round(foul_pred[1]))
-
-        if home_goals > away_goals:
-             result_pred = "H"  
-        elif away_goals > home_goals:
-            result_pred = "A"  
-        else:
-            result_pred = "D"  
-
-        result =  f"""
-            Predicted Outcome: {result_pred}
-            Expected Full-Time Goals: {home_team} {home_goals} - {away_goals} {away_team}
-            Expected Shots: {home_team} {home_shots} - {away_shots} {away_team}
-            Expected Shots on Target: {home_team} {home_shots_on_target} - {away_shots_on_target} {away_team}
-            Expected Fouls: {home_team} {home_fouls} - {away_fouls} {away_team}
-            """
-        return result
-
-    home_team = request.form.get('home_team')
-    away_team = request.form.get('away_team')
-
-    result = predict_match_result(home_team, away_team)
-    return render_template('prediction_result.html', result=result)
+    return tournament()
 
 if __name__ == "__main__":
     app.run(debug=True)
