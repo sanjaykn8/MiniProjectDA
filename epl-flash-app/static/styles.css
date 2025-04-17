@@ -19,7 +19,8 @@
 
 body {
     font-family: 'Fira Code', monospace;
-    background-color: var(--bg-color);
+    background: url('background.jpg') no-repeat center center fixed;
+    background-size: cover;
     color: var(--text-color);
     padding: 40px 20px;
     display: flex;
