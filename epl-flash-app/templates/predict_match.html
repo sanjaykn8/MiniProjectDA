@@ -9,12 +9,16 @@
 <body>
     <h1>Tournament Prediction</h1>
     <h3>Enter 8 Teams for Simulation</h3>
-
     <form method="POST" action="{{ url_for('predict_match') }}">
         {% for i in range(8) %}
             <div class="form-group">
                 <label for="team{{ i }}">Team {{ i+1 }}</label>
-                <input type="text" id="team{{ i }}" name="team[]" placeholder="Enter Team {{ i+1 }}" required>
+                <select id="team{{ i }}" name="team[]" required>
+                    <option value="" disabled selected>Select Team {{ i+1 }}</option>
+                    {% for team in team_list %}
+                        <option value="{{ team }}">{{ team }}</option>
+                    {% endfor %}
+                </select>                
             </div>
         {% endfor %}
         <button type="submit">Simulate Tournament</button>

@@ -30,7 +30,34 @@ def visualize():
         return render_template('cart.html', metrics=results['metrics'], tree=results['tree_plot'], heatmap=results['heatmap'], algo=selected)
     
     elif selected == "Predict Match":
-        return render_template('predict_match.html')
+        team_list=[
+            "Arsenal",
+            "Liverpool",
+            "Chelsea",
+            "Man City",
+            "Tottenham", 
+            "Leicester", 
+            "Everton",
+            "Man United",
+            "Norwich",
+            "West Ham",
+            "Bournemouth",
+            "Sheffield United",
+            "Burnley",
+            "Southampton",
+            "Crystal Palace",
+            "Watford",
+            "Brighton",
+            "Newcastle",
+            "Aston Villa",
+            "Wolves",
+            "Leeds",
+            "Brentford",
+            "Fulham",
+            "Nott'm Forest",
+            "Luton"
+        ]
+        return render_template('predict_match.html',team_list=team_list)
 
     return "Algorithm not implemented yet", 400
 
