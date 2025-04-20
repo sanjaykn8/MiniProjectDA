@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Dashboard</title>
+</head>
+<body>
+    <h1>Football Team Performance Dashboard</h1>
+    
+    <h2>Top 10 Teams by Points</h2>
+    <div>
+        <!-- Insert the bar plot here -->
+        {{ bar_plot_html|safe }}
+    </div>
+
+    <h2>Goals Scored vs Goals Conceded</h2>
+    <div>
+        <!-- Insert the scatter plot here -->
+        {{ scatter_plot_html|safe }}
+    </div>
+</body>
+</html>

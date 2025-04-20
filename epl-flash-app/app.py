@@ -6,6 +6,10 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
 import random
+from visualizations.dashboard import generate_dashboard_data
+import plotly
+import json
+import plotly.graph_objs as go
 
 app = Flask(__name__)
 
@@ -14,7 +18,8 @@ def index():
     algorithms = [
         "ID3 Decision Tree",
         "CART",
-        "Predict Match"
+        "Predict Match",
+        "Dashboard"
     ]
     return render_template('index.html', algorithms=algorithms)
 
@@ -29,6 +34,23 @@ def visualize():
         results = generate_cart_visuals()
         return render_template('cart.html', metrics=results['metrics'], tree=results['tree_plot'], heatmap=results['heatmap'], algo=selected)
     
+    elif selected == "Dashboard":
+        # Sample data (this can be replaced by actual data from your dataset)
+        teams = ["Man City", "Liverpool", "Arsenal", "Man United", "Chelsea", "Tottenham", "Newcastle", "Aston Villa", "West Ham", "Brighton"]
+        points = [89, 85, 79, 75, 70, 68, 65, 62, 59, 55]
+        goals_scored = [90, 85, 80, 76, 70, 65, 62, 60, 57, 53]
+        goals_conceded = [30, 34, 40, 42, 38, 45, 48, 50, 53, 56]
+
+        # Generate the plots using the function
+        bar_plot, scatter_plot = generate_dashboard_data(teams, goals_scored, goals_conceded, points)
+
+        # Convert the plots to HTML
+        bar_plot_html = bar_plot.to_html(full_html=False)
+        scatter_plot_html = scatter_plot.to_html(full_html=False)
+
+        # Render the HTML page with both plots
+        return render_template("dashboard.html", bar_plot_html=bar_plot_html, scatter_plot_html=scatter_plot_html)
+
     elif selected == "Predict Match":
         team_list=[
             "Arsenal",
@@ -60,6 +82,7 @@ def visualize():
         return render_template('predict_match.html',team_list=team_list)
 
     return "Algorithm not implemented yet", 400
+
 
 @app.route('/predict_match', methods=['POST'])
 def predict_match():
