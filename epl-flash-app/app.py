@@ -17,8 +17,8 @@ app.secret_key = 'reaper'  # needed to use session
 @app.route('/')
 def index():
     algorithms = [
-        "ID3 Decision Tree",
-        "CART",
+        "Entropy",
+        "Gini",
         "Predict Match",
         "Dashboard"
     ]
@@ -27,11 +27,11 @@ def index():
 @app.route('/visualize', methods=['POST'])
 def visualize():
     selected = request.form.get('algo')
-    if selected == "ID3 Decision Tree":
+    if selected == "Entropy":
         results = generate_id3_visuals()
         return render_template('id3.html', metrics=results, algo=selected)
     
-    elif selected == "CART":
+    elif selected == "Gini":
         results = generate_cart_visuals()
         return render_template('cart.html', metrics=results['metrics'], tree=results['tree_plot'], heatmap=results['heatmap'], algo=selected)
     
