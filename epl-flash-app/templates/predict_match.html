@@ -23,6 +23,11 @@
         {% endfor %}
         <button type="submit">Simulate Tournament</button>
     </form>
+    {% if prediction_done %}
+    <a href="{{ url_for('dashboard') }}">
+        <button>📊 View Dashboard for Selected Teams</button>
+    </a>
+    {% endif %}
 
     <a href="/">⬅ Back to Home</a>
 </body>

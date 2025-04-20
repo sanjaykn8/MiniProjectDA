@@ -2,7 +2,6 @@ import plotly.graph_objects as go
 import pandas as pd
 
 def generate_dashboard_data(teams, goals_scored, goals_conceded, points):
-    # Create the Top 10 Teams by Points Bar Plot
     bar_plot = go.Figure(data=[go.Bar(
         x=teams,
         y=points,
@@ -10,7 +9,7 @@ def generate_dashboard_data(teams, goals_scored, goals_conceded, points):
     )])
 
     bar_plot.update_layout(
-        title="Top 10 Teams by Points",
+        title="All Teams by Points",
         xaxis_title="Team",
         yaxis_title="Points",
         template="plotly_white"
