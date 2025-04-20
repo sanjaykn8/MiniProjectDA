@@ -177,20 +177,21 @@
   /* Plot Containers */
   .plot-container {
     width: 100%;
-    max-width: 800px;
+    max-width: 600px;
     margin: 2rem 0;
     background: var(--card-bg);
+    border: none;
     border-radius: var(--radius);
     padding: 1rem;
     box-shadow: var(--shadow);
   }
   
   /* Responsive */
-  @media (max-width: 600px) {
+  @media (max-width: 768px) {
     body { padding: 1rem; }
     h1 { font-size: 2rem; }
     h2 { font-size: 1.5rem; }
     form { gap: 0.75rem; }
     button { font-size: 0.95rem; padding: 0.5rem 1rem; }
-  }
+  }  
   
