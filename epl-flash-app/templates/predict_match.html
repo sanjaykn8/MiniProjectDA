@@ -8,8 +8,27 @@
 </head>
 <body>
     <h1>Tournament Prediction</h1>
-    <h3>Enter 8 Teams for Simulation</h3>
 
+    <!-- Team Cluster Visualization Dropdown -->
+    <h3>View Clustering for a Team</h3>
+    <form method="POST" action="{{ url_for('team_cluster') }}">
+        <label for="team">Select a team:</label>
+        <select name="team" onchange="this.form.submit()">
+            <option value="" disabled selected>Select a team</option>
+            {% for team in team_list %}
+                <option value="{{ team }}" {% if selected_team == team %}selected{% endif %}>{{ team }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    {% if cluster_plot_html %}
+        <div class="plot-container">
+            {{ cluster_plot_html | safe }}
+        </div>
+    {% endif %}
+
+    <!-- 8-Team Tournament Form -->
+    <h3>Enter 8 Teams for Simulation</h3>
     <form method="POST" action="{{ url_for('predict_match') }}">
         {% for i in range(8) %}
             <div class="form-group">

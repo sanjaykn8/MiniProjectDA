@@ -4,7 +4,6 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
 import random
-import plotly.graph_objs as go
 from visualizations.dashboard import generate_dashboard_data
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask import session
@@ -19,60 +18,55 @@ def index():
     ]
     return render_template('index.html', algorithms=algorithms)
 
+from visualizations.team_cluster import generate_team_cluster_plot  # You'll create this
+
+@app.route('/team_cluster', methods=['GET', 'POST'])
+def team_cluster():
+    team_list=[
+            "Arsenal",
+            "Liverpool",
+            "Chelsea",
+            "Man City",
+            "Tottenham", 
+            "Leicester", 
+            "Everton",
+            "Man United",
+            "Norwich",
+            "West Ham",
+            "Bournemouth",
+            "Sheffield United",
+            "Burnley",
+            "Southampton",
+            "Crystal Palace",
+            "Watford",
+            "Brighton",
+            "Newcastle",
+            "Aston Villa",
+            "Wolves",
+            "Leeds",
+            "Brentford",
+            "Fulham",
+            "Nott'm Forest",
+            "Luton"
+        ]
+
+    selected_team = request.form.get('team')
+    cluster_plot_html = None
+    
+    if selected_team:
+        from visualizations.team_cluster import generate_team_cluster_plot
+        fig = generate_team_cluster_plot(selected_team)
+        cluster_plot_html = fig.to_html(full_html=False)
+
+    return render_template('predict_match.html',
+                           team_list=team_list,
+                           selected_team=selected_team,
+                           cluster_plot_html=cluster_plot_html)
+
 @app.route('/visualize', methods=['POST'])
 def visualize():
     selected = request.form.get('algo')
-    if selected == "Dashboard":
-        # Get selected teams from session (previously stored after prediction)
-        teams = session.get('selected_teams')
-
-        if not teams:
-            return redirect(url_for('index'))  # Redirect if accessed directly
-
-        df = pd.read_csv('EPL.csv')
-        team_stats = {}
-
-        for team in teams:
-            home_matches = df[df['HomeTeam'] == team]
-            away_matches = df[df['AwayTeam'] == team]
-
-            total_goals = home_matches['FullTimeHomeTeamGoals'].sum() + away_matches['FullTimeAwayTeamGoals'].sum()
-            total_conceded = home_matches['FullTimeAwayTeamGoals'].sum() + away_matches['FullTimeHomeTeamGoals'].sum()
-            total_points = 0
-
-            for match in home_matches.itertuples():
-                if match.FullTimeResult == 'H':
-                    total_points += 3
-                elif match.FullTimeResult == 'D':
-                    total_points += 1
-            for match in away_matches.itertuples():
-                if match.FullTimeResult == 'A':
-                    total_points += 3
-                elif match.FullTimeResult == 'D':
-                    total_points += 1
-
-            team_stats[team] = {
-                'goals_scored': total_goals,
-                'goals_conceded': total_conceded,
-                'points': total_points
-            }
-
-        teams = list(team_stats.keys())
-        goals_scored = [team_stats[t]['goals_scored'] for t in teams]
-        goals_conceded = [team_stats[t]['goals_conceded'] for t in teams]
-        points = [team_stats[t]['points'] for t in teams]
-
-        # Generate plots
-        bar_plot, scatter_plot = generate_dashboard_data(teams, goals_scored, goals_conceded, points)
-
-        # Convert plots to HTML
-        bar_plot_html = bar_plot.to_html(full_html=False)
-        scatter_plot_html = scatter_plot.to_html(full_html=False)
-
-        # Render the template
-        return render_template("dashboard.html", bar_plot_html=bar_plot_html, scatter_plot_html=scatter_plot_html)
-
-    elif selected == "Predict Match":
+    if selected == "Predict Match":
         team_list=[
             "Arsenal",
             "Liverpool",
@@ -289,13 +283,14 @@ def dashboard():
     goals_conceded = [team_stats[t]['goals_conceded'] for t in teams]
     points = [team_stats[t]['points'] for t in teams]
 
-    bar_plot, scatter_plot,violin_plot_conceded, violin_plot_scored = generate_dashboard_data(teams, goals_scored, goals_conceded, points)
+    bar_plot, scatter_plot, pie_chart, stacked_bar, radar_chart = generate_dashboard_data(teams, goals_scored, goals_conceded, points)
 
     return render_template("dashboard.html",
         bar_plot_html=bar_plot.to_html(full_html=False),
         scatter_plot_html=scatter_plot.to_html(full_html=False),
-        violin_plot_conceded_html=violin_plot_conceded.to_html(full_html=False),
-        violin_plot_scored_html=violin_plot_scored.to_html(full_html=False),
+        pie_chart_html=pie_chart.to_html(full_html=False),
+        stacked_bar_html=stacked_bar.to_html(full_html=False),
+        radar_chart_html=radar_chart.to_html(full_html=False)
     )
 
 if __name__ == "__main__":
