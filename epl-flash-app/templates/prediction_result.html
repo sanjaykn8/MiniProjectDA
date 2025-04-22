@@ -71,17 +71,10 @@
     <section class="result-section">
         <h1>🏆 Winner: {{ winner }} 🏆</h1>
     </section>
-
-      <!-- 📊 Dashboard Visuals Section -->
-  <section class="result-section">
-    <h2>Dashboard Visuals</h2>
-    <div class="plot-container">
-      {{ bar_plot_html | safe }}
-    </div>
-    <div class="plot-container">
-      {{ scatter_plot_html | safe }}
-    </div>
-  </section>
+    
+    <a href="{{ url_for('dashboard') }}">
+    <button>📊 View Dashboard for Selected Teams</button>
+    </a>
 
     <a href="{{ url_for('index') }}">⬅ Back to Home</a>
 </body>

@@ -1,6 +1,4 @@
 from flask import Flask, render_template, request
-from visualizations.id3 import generate_id3_visuals  
-from visualizations.cart import generate_cart_visuals
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -17,25 +15,14 @@ app.secret_key = 'reaper'  # needed to use session
 @app.route('/')
 def index():
     algorithms = [
-        "Entropy",
-        "Gini",
-        "Predict Match",
-        "Dashboard"
+        "Predict Match"
     ]
     return render_template('index.html', algorithms=algorithms)
 
 @app.route('/visualize', methods=['POST'])
 def visualize():
     selected = request.form.get('algo')
-    if selected == "Entropy":
-        results = generate_id3_visuals()
-        return render_template('id3.html', metrics=results, algo=selected)
-    
-    elif selected == "Gini":
-        results = generate_cart_visuals()
-        return render_template('cart.html', metrics=results['metrics'], tree=results['tree_plot'], heatmap=results['heatmap'], algo=selected)
-    
-    elif selected == "Dashboard":
+    if selected == "Dashboard":
         # Get selected teams from session (previously stored after prediction)
         teams = session.get('selected_teams')
 
@@ -159,24 +146,7 @@ def predict_match():
                 'away_avg_fouls': away_avg_fouls
             }
         return team_stats
-
-    def generate_dashboard_data(teams, goals_scored, goals_conceded, points):
-        bar = go.Figure([go.Bar(x=teams, y=goals_scored, name='Goals Scored')])
-        bar.update_layout(title='Goals Scored by Each Team', xaxis_title='Teams', yaxis_title='Goals Scored')
-
-        scatter = go.Figure(data=go.Scatter(
-            x=goals_scored,
-            y=goals_conceded,
-            mode='markers+text',
-            text=teams,
-            textposition="top center"
-        ))
-        scatter.update_layout(title='Goals Scored vs Goals Conceded',
-                              xaxis_title='Goals Scored',
-                              yaxis_title='Goals Conceded')
-
-        return bar, scatter
-
+    
     def tournament():
         teams = request.form.getlist('team[]')
         session['selected_teams'] = teams
@@ -254,10 +224,6 @@ def predict_match():
         goals_conceded = [round1_stats[t]['goals_conceded'] for t in sorted_teams]
         points = [round1_stats[t]['points'] for t in sorted_teams]
 
-        bar_plot, scatter_plot = generate_dashboard_data(sorted_teams, goals_scored, goals_conceded, points)
-        bar_plot_html = bar_plot.to_html(full_html=False)
-        scatter_plot_html = scatter_plot.to_html(full_html=False)
-
         semis = sorted_teams[:4]
         semi_stats, semi_results = simulate_round(semis)
         sorted_semis = sorted(semis, key=lambda x: (semi_stats[x]['points'], semi_stats[x]['goals_scored'] - semi_stats[x]['goals_conceded']), reverse=True)
@@ -279,9 +245,7 @@ def predict_match():
             semi_results=semi_results,
             finalists=finalists,
             final_match=f"{final_home1} ({fg1} + {fg4}) vs {final_away1} ({fg2} + {fg3})",
-            winner=winner,
-            bar_plot_html=bar_plot_html,
-            scatter_plot_html=scatter_plot_html
+            winner=winner
         )
 
     return tournament()
@@ -325,11 +289,13 @@ def dashboard():
     goals_conceded = [team_stats[t]['goals_conceded'] for t in teams]
     points = [team_stats[t]['points'] for t in teams]
 
-    bar_plot, scatter_plot = generate_dashboard_data(teams, goals_scored, goals_conceded, points)
+    bar_plot, scatter_plot,violin_plot_conceded, violin_plot_scored = generate_dashboard_data(teams, goals_scored, goals_conceded, points)
 
     return render_template("dashboard.html",
         bar_plot_html=bar_plot.to_html(full_html=False),
-        scatter_plot_html=scatter_plot.to_html(full_html=False)
+        scatter_plot_html=scatter_plot.to_html(full_html=False),
+        violin_plot_conceded_html=violin_plot_conceded.to_html(full_html=False),
+        violin_plot_scored_html=violin_plot_scored.to_html(full_html=False),
     )
 
 if __name__ == "__main__":

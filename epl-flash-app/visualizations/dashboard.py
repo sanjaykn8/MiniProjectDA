@@ -32,5 +32,34 @@ def generate_dashboard_data(teams, goals_scored, goals_conceded, points):
         yaxis_title="Goals Conceded",
         template="plotly_white"
     )
+    
+    violin_plot_scored = go.Figure(data=go.Violin(
+        y=goals_scored,
+        box_visible=True,
+        line_color='green',
+        fillcolor='rgba(0, 250, 0, 0.5)',
+        hovertemplate="Goals Scored: %{y}<br>",
+    ))
 
-    return bar_plot, scatter_plot
+    violin_plot_scored.update_layout(
+        title="Distribution of Goals Scored",
+        yaxis_title="Goals Scored",
+        template="plotly_white"
+    )
+
+    # Violin Plot for Goals Conceded
+    violin_plot_conceded = go.Figure(data=go.Violin(
+        y=goals_conceded,
+        box_visible=True,
+        line_color='red',
+        fillcolor='rgba(250, 0, 0, 0.5)',
+        hovertemplate="Goals Conceded: %{y}<br>",
+    ))
+
+    violin_plot_conceded.update_layout(
+        title="Distribution of Goals Conceded",
+        yaxis_title="Goals Conceded",
+        template="plotly_white"
+    )
+
+    return bar_plot, scatter_plot, violin_plot_conceded, violin_plot_scored
