@@ -29,7 +29,7 @@ def generate_team_cluster_plot(selected_team):
                      size='Avg Shots',
                      color='Avg Fouls',
                      hover_name='Team',
-                     title=f"Clustering Visualization for {selected_team}")
+                     title=f"Visualization for {selected_team}")
 
     fig.add_scatter(x=[df_team_stats[df_team_stats['Team'] == selected_team]['Avg Goals Scored'].values[0]],
                     y=[df_team_stats[df_team_stats['Team'] == selected_team]['Avg Goals Conceded'].values[0]],
