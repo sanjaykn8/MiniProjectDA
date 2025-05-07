@@ -14,7 +14,7 @@ app.secret_key = 'reaper'  # needed to use session
 @app.route('/')
 def index():
     algorithms = [
-        "Predict Match"
+        "Predict"
     ]
     return render_template('index.html', algorithms=algorithms)
 
@@ -66,7 +66,7 @@ def team_cluster():
 @app.route('/visualize', methods=['POST'])
 def visualize():
     selected = request.form.get('algo')
-    if selected == "Predict Match":
+    if selected == "Predict":
         team_list=[
             "Arsenal",
             "Liverpool",
